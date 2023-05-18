@@ -1,6 +1,6 @@
 using LinearAlgebra, SPICE
 
-export e⃗, hyp_turn_angle
+export e⃗, hyp_turn_angle, hyp_periapsis, h⃗, hyp_exit_v
 
 # all r⃗ and v⃗ in planet-centered inertial coordinates
 
@@ -15,6 +15,6 @@ hyp_periapsis(;v⃗∞,e,μ_CB) = hyp_periapsis(v⃗∞=v⃗∞,turn_angle=hyp_t
 
 h⃗(;r⃗,v⃗) = cross(r⃗, v⃗) # Specific angular momentum
 
-hyp_rotate_v(;r⃗∞,v⃗∞,μ_CB) = SPICE.axisar(normalize(h⃗(r⃗=r⃗∞,v⃗=v⃗∞)),hyp_turn_angle(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB=μ_CB)) * v⃗∞
+hyp_exit_v(;r⃗∞,v⃗∞,μ_CB) = SPICE.axisar(normalize(h⃗(r⃗=r⃗∞,v⃗=v⃗∞)),hyp_turn_angle(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB=μ_CB)) * v⃗∞
 
 # TODO: add wrapper function to check periapsis against planet surface or "keep-out" and sphere of influence
