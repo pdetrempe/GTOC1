@@ -1,0 +1,20 @@
+using LinearAlgebra, SPICE
+
+export e⃗, hyp_turn_angle
+
+# all r⃗ and v⃗ in planet-centered inertial coordinates
+
+e⃗(;r⃗,v⃗,μ_CB) = ((norm(v⃗)^2 - μ_CB/norm(r⃗))*r⃗ - (r⃗⋅v⃗)*v⃗)/μ_CB # Vallado 4e Eq. 2-78 (p98)
+
+hyp_turn_angle(;e) = 2*asin(1/e) # Vallado 4e Eq. 2-28 (p53)
+hyp_turn_angle(;r⃗,v⃗,μ_CB) = hyp_turn_angle(e=norm(e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB=μ_CB)))
+
+hyp_periapsis(;v⃗∞,turn_angle,μ_CB) = μ_CB/norm(v⃗∞)^2 * (1/cos((π-turn_angle)/2)-1) # Vallado 4e Eq. 12-12 (p959)
+hyp_periapsis(;r⃗∞,v⃗∞,μ_CB) = hyp_periapsis(v⃗∞=v⃗∞,turn_angle=hyp_turn_angle(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB=μ_CB),μ_CB=μ_CB)
+hyp_periapsis(;v⃗∞,e,μ_CB) = hyp_periapsis(v⃗∞=v⃗∞,turn_angle=hyp_turn_angle(e=e),μ_CB=μ_CB)
+
+h⃗(;r⃗,v⃗) = cross(r⃗, v⃗) # Specific angular momentum
+
+hyp_rotate_v(;r⃗∞,v⃗∞,μ_CB) = SPICE.axisar(normalize(h⃗(r⃗=r⃗∞,v⃗=v⃗∞)),hyp_turn_angle(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB=μ_CB)) * v⃗∞
+
+# TODO: add wrapper function to check periapsis against planet surface or "keep-out" and sphere of influence
