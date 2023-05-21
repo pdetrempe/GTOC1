@@ -14,6 +14,7 @@ module GTOC1
     include("dynamics/modified_equinoctial_elements.jl")
     include("dynamics/frame_conversions.jl")
     include("dynamics/instantaneous.jl")
+    include("dynamics/naive_flyby.jl")
 
 
     # Utilities
