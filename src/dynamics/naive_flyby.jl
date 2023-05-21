@@ -19,8 +19,9 @@ hyp_periapsis(;r⃗∞,v⃗∞,CB) = hyp_periapsis(r⃗∞=r⃗∞,v⃗∞=v⃗�
 hyp_periapsis(;v⃗∞,e,CB) = hyp_periapsis(v⃗∞=v⃗∞,e=e,μ_CB=bodvrd(CB,"GM")[1])
 
 h⃗(;r⃗,v⃗) = cross(r⃗, v⃗) # Specific angular momentum
+ĥ(;r⃗,v⃗) = normalize(h⃗(r⃗=r⃗,v⃗=v⃗)) # Specific angular momentum unit vector
 
-hyp_exit_v(;r⃗∞,v⃗∞,μ_CB) = axisar(normalize(h⃗(r⃗=r⃗∞,v⃗=v⃗∞)),hyp_turn_angle(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB=μ_CB)) * v⃗∞
+hyp_exit_v(;r⃗∞,v⃗∞,μ_CB) = axisar(ĥ(r⃗=r⃗∞,v⃗=v⃗∞),hyp_turn_angle(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB=μ_CB)) * v⃗∞
 hyp_exit_v(;r⃗∞,v⃗∞,CB) = hyp_exit_v(r⃗∞=r⃗∞,v⃗∞=v⃗∞,μ_CB=bodvrd(CB,"GM")[1])
 
 # TODO: add wrapper function to check periapsis against planet surface or "keep-out" and sphere of influence
