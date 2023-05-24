@@ -1,6 +1,6 @@
 using LinearAlgebra, SPICE
 
-export e⃗, hyp_turn_angle, hyp_periapsis, hyp_exit_v⃗, hyp_exit_r⃗
+export e⃗, ν, semi_major_axis, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, hyp_TOF
 
 GM_CB(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
