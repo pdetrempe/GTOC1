@@ -1,6 +1,6 @@
 using LinearAlgebra, SPICE
 
-export e⃗, ν, a, sphere_of_influence, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, hyp_TOF
+export e⃗, ν, a, i, Ω, ω, RV2COE, COE2RV, sphere_of_influence, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, flyby_TOF
 
 get_GM(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
@@ -143,7 +143,7 @@ function hyp_exit_x⃗(;x⃗∞,μ_CB_or_CB_name)
     return exit_x⃗
 end
 
-function hyp_TOF(;x⃗∞,μ_CB_or_CB_name)
+function flyby_TOF(;x⃗∞,μ_CB_or_CB_name)
     r⃗∞ = x⃗∞[1:3]
     v⃗∞ = x⃗∞[4:6]
     μ_CB = get_GM(μ_CB_or_CB_name)
