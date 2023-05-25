@@ -2,10 +2,10 @@ using LinearAlgebra, SPICE
 
 export e⃗, ν, semi_major_axis, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, hyp_TOF
 
-GM_CB(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
+get_GM(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
 function e⃗(;r⃗,v⃗,μ_CB_or_CB_name)
-    μ_CB = GM_CB(μ_CB_or_CB_name)
+    μ_CB = get_GM(μ_CB_or_CB_name)
     return ((norm(v⃗)^2 - μ_CB/norm(r⃗))*r⃗ - (r⃗⋅v⃗)*v⃗)/μ_CB # Vallado 4e Eq. 2-78 (p98)
 end
 
@@ -16,7 +16,15 @@ function ν(;r⃗,v⃗,μ_CB_or_CB_name)
 end
 
 function semi_major_axis(;r⃗,v⃗,μ_CB_or_CB_name)
-    return 1/(2/norm(r⃗) - norm(v⃗)^2/GM_CB(μ_CB_or_CB_name)) # Vallado 4e Eq. 2-74 (p96)
+    return 1/(2/norm(r⃗) - norm(v⃗)^2/get_GM(μ_CB_or_CB_name)) # Vallado 4e Eq. 2-74 (p96)
+end
+
+function sphere_of_influence(;CB::String,orbiting_body::String)
+    orbiting_body_state = spkgeo(bodn2c(orbiting_body),J2000_ET,base_ref_frame,CB)[1]
+    orbiting_body_GM = bodvrd(orbiting_body,"GM")[1]
+    CB_GM = bodvrd(CB,"GM")[1]
+    orbiting_body_a = 1/(2/norm(orbiting_body_state[1:3]) - norm(orbiting_body_state[4:6])^2/CB_GM) # Vallado 4e Eq. 2-74 (p96)
+    return orbiting_body_a*(orbiting_body_GM/CB_GM)^0.4
 end
 
 function hyp_anom(;r⃗,v⃗,μ_CB_or_CB_name)
@@ -32,7 +40,7 @@ function hyp_turn_angle(;e)
 end
 
 function hyp_periapsis(;v⃗∞,turn_angle,μ_CB_or_CB_name)
-    return GM_CB(μ_CB_or_CB_name)/norm(v⃗∞)^2 * (1/cos((π-turn_angle)/2)-1) # Vallado 4e Eq. 12-12 (p959)
+    return get_GM(μ_CB_or_CB_name)/norm(v⃗∞)^2 * (1/cos((π-turn_angle)/2)-1) # Vallado 4e Eq. 12-12 (p959)
 end
 
 # h⃗(;r⃗,v⃗) = cross(r⃗, v⃗) # Specific angular momentum
@@ -75,7 +83,7 @@ end
 function hyp_TOF(;x⃗∞,μ_CB_or_CB_name)
     r⃗∞ = x⃗∞[1:3]
     v⃗∞ = x⃗∞[4:6]
-    μ_CB = GM_CB(μ_CB_or_CB_name)
+    μ_CB = get_GM(μ_CB_or_CB_name)
     ecc = ((norm(v⃗)^2 - μ_CB/norm(r⃗))*r⃗ - (r⃗⋅v⃗)*v⃗)/μ_CB # Vallado 4e Eq. 2-78 (p98)
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗∞)/(e*norm(r⃗∞))) # Vallado 4e Eq. 2-86 (p100)
