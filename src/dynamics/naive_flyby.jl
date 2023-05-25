@@ -1,6 +1,6 @@
 using LinearAlgebra, SPICE
 
-export e⃗, ν, semi_major_axis, sphere_of_influence, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, hyp_TOF
+export e⃗, ν, a, sphere_of_influence, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, hyp_TOF
 
 get_GM(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
@@ -15,7 +15,7 @@ function ν(;r⃗,v⃗,μ_CB_or_CB_name)
     return r⃗⋅v⃗ > 0 ? ν̃ : 360 - ν̃ # Correct for halfspace
 end
 
-function semi_major_axis(;r⃗,v⃗,μ_CB_or_CB_name)
+function a(;r⃗,v⃗,μ_CB_or_CB_name)
     return 1/(2/norm(r⃗) - norm(v⃗)^2/get_GM(μ_CB_or_CB_name)) # Vallado 4e Eq. 2-74 (p96)
 end
 
