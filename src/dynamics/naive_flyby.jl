@@ -1,6 +1,6 @@
 using LinearAlgebra, SPICE
 
-export e⃗, ν, semi_major_axis, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, hyp_TOF
+export e⃗, ν, semi_major_axis, sphere_of_influence, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, hyp_TOF
 
 get_GM(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
@@ -20,11 +20,11 @@ function semi_major_axis(;r⃗,v⃗,μ_CB_or_CB_name)
 end
 
 function sphere_of_influence(;CB::String,orbiting_body::String)
-    orbiting_body_state = spkgeo(bodn2c(orbiting_body),J2000_ET,base_ref_frame,CB)[1]
+    orbiting_body_state = spkgeo(bodn2c(orbiting_body),0,base_ref_frame,bodn2c(CB))[1]
     orbiting_body_GM = bodvrd(orbiting_body,"GM")[1]
     CB_GM = bodvrd(CB,"GM")[1]
     orbiting_body_a = 1/(2/norm(orbiting_body_state[1:3]) - norm(orbiting_body_state[4:6])^2/CB_GM) # Vallado 4e Eq. 2-74 (p96)
-    return orbiting_body_a*(orbiting_body_GM/CB_GM)^0.4
+    return orbiting_body_a*(orbiting_body_GM/CB_GM)^0.4 # Vallado 4e Eq. 12-2 (p948)
 end
 
 function hyp_anom(;r⃗,v⃗,μ_CB_or_CB_name)
