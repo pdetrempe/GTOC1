@@ -20,5 +20,6 @@ module GTOC1
     # Utilities
     include("utils/time.jl")
     include("utils/SPICE_kernels.jl")
+    include("utils/defaults.jl")
 
 end
