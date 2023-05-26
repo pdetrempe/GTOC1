@@ -4,8 +4,8 @@ module GTOC1
     @reexport using SPICE
     @reexport using AstroTime
     @reexport using Plots
-    @reexport using PlanetOrbits
-    @reexport import PlanetOrbits: m2au, _trueanom_from_eccanom
+    # @reexport using PlanetOrbits
+    # @reexport import PlanetOrbits: m2au, _trueanom_from_eccanom
     @reexport using OrdinaryDiffEq
     @reexport using LinearAlgebra
 
