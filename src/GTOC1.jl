@@ -1,13 +1,11 @@
 module GTOC1
-    using Reexport
-
-    @reexport using SPICE
-    @reexport using AstroTime
-    @reexport using Plots
-    # @reexport using PlanetOrbits
-    # @reexport import PlanetOrbits: m2au, _trueanom_from_eccanom
-    @reexport using OrdinaryDiffEq
-    @reexport using LinearAlgebra
+    using SPICE
+    using AstroTime
+    using Plots
+    # using PlanetOrbits
+    # import PlanetOrbits: m2au, _trueanom_from_eccanom
+    using OrdinaryDiffEq
+    using LinearAlgebra
 
     # Dynamics
     include("dynamics/keplerian_elements.jl")
