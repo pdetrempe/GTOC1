@@ -1,6 +1,6 @@
 using LinearAlgebra, SPICE
 
-export e⃗, ν, a, i, Ω, ω, RV2COE, COE2RV, sphere_of_influence, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, flyby_TOF
+export e⃗, ν, a, i, Ω, ω, RV2COE, COE2RV, body_SOI, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, flyby_TOF
 
 get_GM(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
@@ -82,7 +82,7 @@ function COE2RV(;a,e,i,Ω,ω,ν,μ_CB_or_CB_name) # Vallado 4e Algorithm 10 (p11
     return x⃗
 end
 
-function sphere_of_influence(;CB::String,orbiting_body::String)
+function body_SOI(;CB::String,orbiting_body::String)
     orbiting_body_state = spkgeo(bodn2c(orbiting_body),0,base_ref_frame,bodn2c(CB))[1]
     orbiting_body_GM = bodvrd(orbiting_body,"GM")[1]
     CB_GM = bodvrd(CB,"GM")[1]

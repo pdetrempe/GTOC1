@@ -1,21 +1,21 @@
 using SPICE, AstroTime
 
-export meananom_to_ref_time, get_osc_elt, get_planet_orbit
+export body_osc_elt #, get_planet_orbit
 
 # # Compute asteroid reference time from mean anomaly
 # # Because the PlanetOrbits package uses reference time exclusively
 # meananom_to_ref_time(mean_anom) = mean_anom/(2π)
 
 # Get osculating elements for a planet
-function get_osc_elt(;planet::String, ET::Epoch, frame="ECLIPJ2000", CB="Sun")
-    (state, _) = spkezr(planet, Epoch_to_SPICE_ET(ET), frame, "none", CB)
-    μ_CB = bodvrd(CB, "GM")[1]
-    OE = oscelt(state, Epoch_to_SPICE_ET(ET), μ_CB)
+function body_osc_elt(;planet::String, epoch::Epoch, frame=base_ref_frame, CB=base_CB_str)
+    ET = Epoch_to_SPICE_ET(epoch)
+    body_state, _ = spkgeo(planet, ET, frame, CB)
+    return oscltx(body_state, ET, bodvrd(CB,"GM")[1])
 end
 
 
 # function get_planet_orbit(;planet::String, ET::Epoch, frame="ECLIPJ2000", CB="Sun")
-#     OE = get_osc_elt(;planet=planet, ET=ET, frame=frame, CB=CB)
+#     OE = body_osc_elt(;planet=planet, ET=ET, frame=frame, CB=CB)
 
 #     e = OE[2]
 #     a = OE[1]/(1-e) * 1000 # convert from km to m
