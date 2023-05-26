@@ -1,5 +1,5 @@
 using GTOC1
-using DifferentialEquations
+using DifferentialEquations, Plots
 
 ## Furnish relevant SPICE kernels
 furnish_all_kernels()

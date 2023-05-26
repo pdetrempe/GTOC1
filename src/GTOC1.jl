@@ -1,11 +1,11 @@
 module GTOC1
-    using SPICE
-    using AstroTime
-    using Plots
+    # using SPICE
+    # using AstroTime
+    # using Plots
     # using PlanetOrbits
     # import PlanetOrbits: m2au, _trueanom_from_eccanom
-    using OrdinaryDiffEq
-    using LinearAlgebra
+    # using OrdinaryDiffEq
+    # using LinearAlgebra
 
     # Dynamics
     include("dynamics/keplerian_elements.jl")
