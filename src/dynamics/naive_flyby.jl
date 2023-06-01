@@ -26,14 +26,14 @@ end
 
 function Ω(;r⃗,v⃗)
     h⃗ = r⃗ × v⃗
-    n⃗ = h⃗[3]
+    n⃗ = [0,0,1] × h⃗ # Vallado 4e Eq. 2-83 (p99)
     RAAN = acos(normalize(n⃗)[1]) # Vallado 4e Eq. 2-84 (p99)
     return n⃗[2] > 0 ? RAAN : 360 - RAAN
 end
 
 function ω(;r⃗,v⃗,μ_CB_or_CB_name)
     h⃗ = r⃗ × v⃗
-    n⃗ = h⃗[3]
+    n⃗ = [0,0,1] × h⃗ # Vallado 4e Eq. 2-83 (p99)
     ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
     AOP = acos((n⃗⋅ecc)/(norm(n⃗)*norm(ecc))) # Vallado 4e Eq. 2-85 (p100)
     return ecc[3] > 0 ? AOP : 360 - AOP
@@ -45,7 +45,7 @@ function RV2COE(;x⃗,μ_CB_or_CB_name) # Vallado 4e Algorithm 9 (p113)
     r = norm(r⃗)
     v = norm(v⃗)
     h⃗ = r⃗ × v⃗
-    n⃗ = h⃗[3]
+    n⃗ = [0,0,1] × h⃗ # Vallado 4e Eq. 2-83 (p99)
     μ_CB = get_GM(μ_CB_or_CB_name)
     sma = 1/(2/r - v^2/μ_CB) # Vallado 4e Eq. 2-74 (p96)
     ecc = ((v^2 - μ_CB/r)*r⃗ - (r⃗⋅v⃗)*v⃗)/μ_CB # Vallado 4e Eq. 2-78 (p98)
