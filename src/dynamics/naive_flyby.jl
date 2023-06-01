@@ -12,7 +12,7 @@ end
 function ν(;r⃗,v⃗,μ_CB_or_CB_name)
     ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
     ν̃ = acos((ecc⋅r⃗)/(norm(ecc)*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
-    return r⃗⋅v⃗ > 0 ? ν̃ : 360 - ν̃ # Correct for halfspace
+    return r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
 end
 
 function a(;r⃗,v⃗,μ_CB_or_CB_name)
@@ -28,7 +28,7 @@ function Ω(;r⃗,v⃗)
     h⃗ = r⃗ × v⃗
     n⃗ = [0,0,1] × h⃗ # Vallado 4e Eq. 2-83 (p99)
     RAAN = acos(normalize(n⃗)[1]) # Vallado 4e Eq. 2-84 (p99)
-    return n⃗[2] > 0 ? RAAN : 360 - RAAN
+    return n⃗[2] > 0 ? RAAN : 2π - RAAN
 end
 
 function ω(;r⃗,v⃗,μ_CB_or_CB_name)
@@ -36,7 +36,7 @@ function ω(;r⃗,v⃗,μ_CB_or_CB_name)
     n⃗ = [0,0,1] × h⃗ # Vallado 4e Eq. 2-83 (p99)
     ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
     AOP = acos((n⃗⋅ecc)/(norm(n⃗)*norm(ecc))) # Vallado 4e Eq. 2-85 (p100)
-    return ecc[3] > 0 ? AOP : 360 - AOP
+    return ecc[3] > 0 ? AOP : 2π - AOP
 end
 
 function RV2COE(;x⃗,μ_CB_or_CB_name) # Vallado 4e Algorithm 9 (p113)
@@ -52,11 +52,11 @@ function RV2COE(;x⃗,μ_CB_or_CB_name) # Vallado 4e Algorithm 9 (p113)
     e = norm(ecc)
     inc = acos(normalize(h⃗)[3]) # Vallado 4e Eq. 2-82 (p99)
     RAAN = acos(normalize(n⃗)[1]) # Vallado 4e Eq. 2-84 (p99)
-    RAAN2 = n⃗[2] > 0 ? RAAN : 360 - RAAN
+    RAAN2 = n⃗[2] > 0 ? RAAN : 2π - RAAN
     AOP = acos((n⃗⋅ecc)/(norm(n⃗)*e)) # Vallado 4e Eq. 2-85 (p100)
-    AOP2 = ecc[3] > 0 ? AOP : 360 - AOP
+    AOP2 = ecc[3] > 0 ? AOP : 2π - AOP
     trueanom = acos((ecc⋅r⃗)/(e*r)) # Vallado 4e Eq. 2-86 (p100)
-    trueanom2 = r⃗⋅v⃗ > 0 ? trueanom : 360 - trueanom
+    trueanom2 = r⃗⋅v⃗ > 0 ? trueanom : 2π - trueanom
     return [sma,e,inc,RAAN2,AOP2,trueanom2]
 end
 
@@ -94,7 +94,7 @@ function hyp_anom(;r⃗,v⃗,μ_CB_or_CB_name)
     ecc = e⃗(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB_or_CB_name=μ_CB_or_CB_name) # Copy-paste true anomaly function here to save one internal variable (ecc) and hopefully improve performance there
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗∞)/(e*norm(r⃗∞))) # Vallado 4e Eq. 2-86 (p100)
-    trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 360 - ν̃ # Correct for halfspace
+    trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
     return 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom/2))
 end
 
@@ -150,7 +150,7 @@ function flyby_TOF(;x⃗∞,μ_CB_or_CB_name)
     ecc = ((norm(v⃗)^2 - μ_CB/norm(r⃗))*r⃗ - (r⃗⋅v⃗)*v⃗)/μ_CB # Vallado 4e Eq. 2-78 (p98)
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗∞)/(e*norm(r⃗∞))) # Vallado 4e Eq. 2-86 (p100)
-    trueanom_in = r⃗⋅v⃗ > 0 ? ν̃ : 360 - ν̃ # Correct for halfspace; true anomaly at SOI entry
+    trueanom_in = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace; true anomaly at SOI entry
     H_in = 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom_in/2)) # Hyperbolic anomaly at SOI entry
     H_out = -H_in # We know that the hyperbolic anomaly has the same magnitude at entry and exit
     sma = 1/(2/norm(r⃗∞) - norm(v⃗∞)^2/μ_CB) # Vallado 4e Eq. 2-74 (p96)
