@@ -7,7 +7,7 @@ export body_osc_elt #, get_planet_orbit
 # meananom_to_ref_time(mean_anom) = mean_anom/(2π)
 
 # Get osculating elements for a planet
-function body_osc_elt(;planet::String, epoch::Epoch, frame=base_ref_frame, CB=base_CB_str)
+function body_osc_elt(;planet::String, epoch::Epoch, frame=default_ref_frame, CB=default_CB_str)
     ET = Epoch_to_SPICE_ET(epoch)
     body_state, _ = spkgeo(planet, ET, frame, CB)
     return oscltx(body_state, ET, bodvrd(CB,"GM")[1])
