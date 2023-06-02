@@ -63,4 +63,20 @@ furnish_all_kernels()
             @test ta ≈ tb
         end
     end
+    @testset "COE2RV Planet-centered" begin
+        bdy = "Moon"
+        CB = "Earth"
+        epochs = [86400,86400*(365*21+119)]
+        for et in epochs
+            x⃗_bdy = spkgeo(bodn2c(bdy),et,GTOC1.default_ref_frame,GTOC1.default_CB_idx)[1]
+            x⃗_CB = spkgeo(bodn2c(CB),et,GTOC1.default_ref_frame,GTOC1.default_CB_idx)[1]
+            x⃗_test = x⃗_bdy - x⃗_CB
+            elts = GTOC1.RV2COE(x⃗=x⃗_test,μ_CB_or_CB_name=CB)
+            rp = elts[1]*(1-elts[2])
+            M0 = GTOC1.mean_anom(r⃗=view(x⃗_test,1:3),v⃗=view(x⃗_test,4:6),μ_CB_or_CB_name=CB)
+            ta = SPICE.conics([rp,elts[2:5]...,M0,et,bodvrd(CB,"GM")[1]],et)
+            tb = GTOC1.COE2RV(a=elts[1],e=elts[2],i=elts[3],Ω=elts[4],ω=elts[5],ν=elts[6],μ_CB_or_CB_name=CB)
+            @test ta ≈ tb
+        end
+    end
 end
