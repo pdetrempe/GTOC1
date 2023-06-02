@@ -40,8 +40,8 @@ function ω(;r⃗,v⃗,μ_CB_or_CB_name)
 end
 
 function RV2COE(;x⃗,μ_CB_or_CB_name) # Vallado 4e Algorithm 9 (p113)
-    r⃗ = x⃗[1:3]
-    v⃗ = x⃗[4:6]
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
     r = norm(r⃗)
     v = norm(v⃗)
     h⃗ = r⃗ × v⃗
@@ -147,8 +147,8 @@ function hyp_exit_v⃗(;r⃗∞,v⃗∞,μ_CB_or_CB_name)
 end
 
 function hyp_exit_x⃗(;x⃗∞,μ_CB_or_CB_name)
-    r⃗∞ = x⃗∞[1:3]
-    v⃗∞ = x⃗∞[4:6]
+    r⃗∞ = view(x⃗∞,1:3)
+    v⃗∞ = view(x⃗∞,4:6)
     ecc = e⃗(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB_or_CB_name=μ_CB_or_CB_name)
     exit_x⃗ = Vector{Float64}(undef,6)
     exit_x⃗[1:3] = vrotv( # Mirror the radius vector "at infinity" about the periapsis vector
@@ -165,8 +165,8 @@ function hyp_exit_x⃗(;x⃗∞,μ_CB_or_CB_name)
 end
 
 function flyby_TOF(;x⃗∞,μ_CB_or_CB_name)
-    r⃗∞ = x⃗∞[1:3]
-    v⃗∞ = x⃗∞[4:6]
+    r⃗∞ = view(x⃗∞,1:3)
+    v⃗∞ = view(x⃗∞,4:6)
     μ_CB = get_GM(μ_CB_or_CB_name)
     ecc = ((norm(v⃗)^2 - μ_CB/norm(r⃗))*r⃗ - (r⃗⋅v⃗)*v⃗)/μ_CB # Vallado 4e Eq. 2-78 (p98)
     e = norm(ecc)
