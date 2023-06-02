@@ -4,34 +4,46 @@ export e⃗, ν, a, i, Ω, ω, RV2COE, COE2RV, body_SOI, hyp_anom, ecc_anom, mea
 
 get_GM(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
-function e⃗(;r⃗,v⃗,μ_CB_or_CB_name)
+function e⃗(;x⃗,μ_CB_or_CB_name)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
     μ_CB = get_GM(μ_CB_or_CB_name)
     return ((norm(v⃗)^2 - μ_CB/norm(r⃗))*r⃗ - (r⃗⋅v⃗)*v⃗)/μ_CB # Vallado 4e Eq. 2-78 (p98)
 end
 
-function ν(;r⃗,v⃗,μ_CB_or_CB_name)
-    ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
+function ν(;x⃗,μ_CB_or_CB_name)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
+    ecc = e⃗(x⃗=x⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
     ν̃ = acos((ecc⋅r⃗)/(norm(ecc)*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
     return r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
 end
 
-function a(;r⃗,v⃗,μ_CB_or_CB_name)
+function a(;x⃗,μ_CB_or_CB_name)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
     return 1/(2/norm(r⃗) - norm(v⃗)^2/get_GM(μ_CB_or_CB_name)) # Vallado 4e Eq. 2-74 (p96)
 end
 
-function i(;r⃗,v⃗)
+function i(;x⃗)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
     h⃗ = r⃗ × v⃗
     return acos(normalize(h⃗)[3]) # Vallado 4e Eq. 2-82 (p99)
 end
 
-function Ω(;r⃗,v⃗)
+function Ω(;x⃗)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
     h⃗ = r⃗ × v⃗
     n⃗ = [0,0,1] × h⃗ # Vallado 4e Eq. 2-83 (p99)
     RAAN = acos(normalize(n⃗)[1]) # Vallado 4e Eq. 2-84 (p99)
     return n⃗[2] > 0 ? RAAN : 2π - RAAN
 end
 
-function ω(;r⃗,v⃗,μ_CB_or_CB_name)
+function ω(;x⃗,μ_CB_or_CB_name)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
     h⃗ = r⃗ × v⃗
     n⃗ = [0,0,1] × h⃗ # Vallado 4e Eq. 2-83 (p99)
     ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
@@ -60,7 +72,9 @@ function RV2COE(;x⃗,μ_CB_or_CB_name) # Vallado 4e Algorithm 9 (p113)
     return [sma,e,inc,RAAN2,AOP2,trueanom2]
 end
 
-function COE2RV(;a,e,i,Ω,ω,ν,μ_CB_or_CB_name) # Vallado 4e Algorithm 10 (p118)
+"   COE = [a,e,i,Ω,ω,ν]"
+function COE2RV(;COE,μ_CB_or_CB_name) # Vallado 4e Algorithm 10 (p118)
+    a,e,i,Ω,ω,ν = COE
     μ_CB = get_GM(μ_CB_or_CB_name)
     p = a*(1-e^2)
     ci = cos(i); si = sin(i)
@@ -90,24 +104,30 @@ function body_SOI(;CB::String,orbiting_body::String)
     return orbiting_body_a*(orbiting_body_GM/CB_GM)^0.4 # Vallado 4e Eq. 12-2 (p948)
 end
 
-function hyp_anom(;r⃗,v⃗,μ_CB_or_CB_name)
-    ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
+function hyp_anom(;x⃗,μ_CB_or_CB_name)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
+    ecc = e⃗(x⃗=x⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗)/(e*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
     trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
     return 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom/2)) # Vallado 4e Eq. 2-35 (p56)
 end
 
-function ecc_anom(;r⃗,v⃗,μ_CB_or_CB_name)
-    ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
+function ecc_anom(;x⃗,μ_CB_or_CB_name)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
+    ecc = e⃗(x⃗=x⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗)/(e*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
     trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
     return 2*atan(sqrt((1-e)/(1+e)) * tan(trueanom/2)) # Vallado 4e Eq. 2-14 (p48)
 end
 
-function mean_anom(;r⃗,v⃗,μ_CB_or_CB_name)
-    ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
+function mean_anom(;x⃗,μ_CB_or_CB_name)
+    r⃗ = view(x⃗,1:3)
+    v⃗ = view(x⃗,4:6)
+    ecc = e⃗(x⃗=x⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗)/(e*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
     trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
@@ -119,30 +139,38 @@ function mean_anom(;r⃗,v⃗,μ_CB_or_CB_name)
     return anom - e*sin(anom) # Vallado 4e Eq. 2-4 (p45)
 end
 
-function hyp_turn_angle(;e)
-    return 2*asin(1/e) # Vallado 4e Eq. 2-28 (p53)
+function hyp_turn_angle(;x⃗,μ_CB_or_CB_name)
+    ecc = e⃗(x⃗=x⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
+    return 2*asin(1/norm(ecc)) # Vallado 4e Eq. 2-28 (p53)
 end
 
-function hyp_periapsis(;v⃗∞,turn_angle,μ_CB_or_CB_name)
+function hyp_periapsis(;x⃗∞,μ_CB_or_CB_name)
+    v⃗∞ = view(x⃗∞,4:6)
+    ecc = e⃗(x⃗=x⃗∞,μ_CB_or_CB_name=μ_CB_or_CB_name)
+    turn_angle = 2*asin(1/norm(ecc)) # Vallado 4e Eq. 2-28 (p53)
     return get_GM(μ_CB_or_CB_name)/norm(v⃗∞)^2 * (1/cos((π-turn_angle)/2)-1) # Vallado 4e Eq. 12-12 (p959)
 end
 
 # h⃗(;r⃗,v⃗) = r⃗ × v⃗ # Specific angular momentum
 # ĥ(;r⃗,v⃗) = normalize(h⃗(r⃗=r⃗,v⃗=v⃗)) # Specific angular momentum unit vector
 
-function hyp_exit_r⃗(;r⃗∞,v⃗∞,μ_CB_or_CB_name)
+function hyp_exit_r⃗(;x⃗∞,μ_CB_or_CB_name)
+    r⃗∞ = view(x⃗∞,1:3)
+    v⃗∞ = view(x⃗∞,4:6)
     return vrotv( # Mirror the radius vector "at infinity" about the periapsis vector
         r⃗∞, # To be rotated
-        e⃗(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB_or_CB_name=μ_CB_or_CB_name), # periapsis vector (not required to be unit vector)
+        e⃗(x⃗=x⃗∞,μ_CB_or_CB_name=μ_CB_or_CB_name), # periapsis vector (not required to be unit vector)
         π # 180 degrees
     )
 end
 
-function hyp_exit_v⃗(;r⃗∞,v⃗∞,μ_CB_or_CB_name)
+function hyp_exit_v⃗(;x⃗∞,μ_CB_or_CB_name)
+    r⃗∞ = view(x⃗∞,1:3)
+    v⃗∞ = view(x⃗∞,4:6)
     return vrotv(
         v⃗∞,
         r⃗∞ × v⃗∞, # axis of rotation as specific angular momentum vector
-        hyp_turn_angle(e=norm(e⃗(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB_or_CB_name=μ_CB_or_CB_name))) # turn by the hyperbolic turn angle
+        hyp_turn_angle(x⃗=x⃗∞,μ_CB_or_CB_name=μ_CB_or_CB_name) # turn by the hyperbolic turn angle
     )
 end
 
