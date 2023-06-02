@@ -1,6 +1,6 @@
 using LinearAlgebra, SPICE
 
-export e⃗, ν, a, i, Ω, ω, RV2COE, COE2RV, body_SOI, hyp_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, flyby_TOF
+export e⃗, ν, a, i, Ω, ω, RV2COE, COE2RV, body_SOI, hyp_anom, ecc_anom, mean_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, flyby_TOF
 
 get_GM(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
@@ -91,11 +91,32 @@ function body_SOI(;CB::String,orbiting_body::String)
 end
 
 function hyp_anom(;r⃗,v⃗,μ_CB_or_CB_name)
-    ecc = e⃗(r⃗=r⃗∞,v⃗=v⃗∞,μ_CB_or_CB_name=μ_CB_or_CB_name) # Copy-paste true anomaly function here to save one internal variable (ecc) and hopefully improve performance there
+    ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
     e = norm(ecc)
-    ν̃ = acos((ecc⋅r⃗∞)/(e*norm(r⃗∞))) # Vallado 4e Eq. 2-86 (p100)
+    ν̃ = acos((ecc⋅r⃗)/(e*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
     trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
-    return 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom/2))
+    return 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom/2)) # Vallado 4e Eq. 2-35 (p56)
+end
+
+function ecc_anom(;r⃗,v⃗,μ_CB_or_CB_name)
+    ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
+    e = norm(ecc)
+    ν̃ = acos((ecc⋅r⃗)/(e*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
+    trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
+    return 2*atan(sqrt((1-e)/(1+e)) * tan(trueanom/2)) # Vallado 4e Eq. 2-14 (p48)
+end
+
+function mean_anom(;r⃗,v⃗,μ_CB_or_CB_name)
+    ecc = e⃗(r⃗=r⃗,v⃗=v⃗,μ_CB_or_CB_name=μ_CB_or_CB_name)
+    e = norm(ecc)
+    ν̃ = acos((ecc⋅r⃗)/(e*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
+    trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
+    anom = if e < 1 
+        2*atan(sqrt((1-e)/(1+e)) * tan(trueanom/2)) # Vallado 4e Eq. 2-14 (p48)
+    elseif e > 1
+        2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom/2)) # Vallado 4e Eq. 2-35 (p56)
+    end
+    return anom - e*sin(anom) # Vallado 4e Eq. 2-4 (p45)
 end
 
 function hyp_turn_angle(;e)
@@ -154,5 +175,5 @@ function flyby_TOF(;x⃗∞,μ_CB_or_CB_name)
     H_in = 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom_in/2)) # Hyperbolic anomaly at SOI entry
     H_out = -H_in # We know that the hyperbolic anomaly has the same magnitude at entry and exit
     sma = 1/(2/norm(r⃗∞) - norm(v⃗∞)^2/μ_CB) # Vallado 4e Eq. 2-74 (p96)
-    return sqrt(-sma^3/μ_CB)*(e*sinh(H_out) - H_out - (e*sinh(H_in) - H_in))
+    return sqrt(-sma^3/μ_CB)*(e*sinh(H_out) - H_out - (e*sinh(H_in) - H_in)) # Vallado 4e Eq. 2-39 (p57)
 end
