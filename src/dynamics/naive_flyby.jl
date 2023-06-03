@@ -196,12 +196,47 @@ function flyby_TOF(;x⃗∞,μ_CB_or_CB_name)
     r⃗∞ = view(x⃗∞,1:3)
     v⃗∞ = view(x⃗∞,4:6)
     μ_CB = get_GM(μ_CB_or_CB_name)
-    ecc = ((norm(v⃗)^2 - μ_CB/norm(r⃗))*r⃗ - (r⃗⋅v⃗)*v⃗)/μ_CB # Vallado 4e Eq. 2-78 (p98)
+    ecc = ((norm(v⃗∞)^2 - μ_CB/norm(r⃗∞))*r⃗ - (r⃗∞⋅v⃗∞)*v⃗∞)/μ_CB # Vallado 4e Eq. 2-78 (p98)
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗∞)/(e*norm(r⃗∞))) # Vallado 4e Eq. 2-86 (p100)
-    trueanom_in = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace; true anomaly at SOI entry
+    trueanom_in = r⃗∞⋅v⃗∞ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace; true anomaly at SOI entry
     H_in = 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom_in/2)) # Hyperbolic anomaly at SOI entry
     H_out = -H_in # We know that the hyperbolic anomaly has the same magnitude at entry and exit
     sma = 1/(2/norm(r⃗∞) - norm(v⃗∞)^2/μ_CB) # Vallado 4e Eq. 2-74 (p96)
     return sqrt(-sma^3/μ_CB)*(e*sinh(H_out) - H_out - (e*sinh(H_in) - H_in)) # Vallado 4e Eq. 2-39 (p57)
+end
+
+function naive_flyby(;x⃗_inrt,epoch_et,flyby_body,CB=default_CB_str,inrt_frame=default_ref_frame)
+    fbbdyc = bodn2c(flyby_body)
+    CBc = bodn2c(CB)
+
+    x⃗_fbbdy = spkgeo(fbbdyc,epoch_et,inrt_frame,CBc)[1]
+    x⃗∞in = x⃗_inrt - x⃗_fbbdy
+    r⃗∞ = view(x⃗∞in,1:3)
+    v⃗∞ = view(x⃗∞in,4:6)
+    μ_fbbdy = bodvrd(flyby_body,"GM")[1]
+    ecc = ((norm(v⃗∞)^2 - μ_fbbdy/norm(r⃗⟺))*r⃗∞ - (r⃗∞⋅v⃗∞)*v⃗∞)/μ_fbbdy # Vallado 4e Eq. 2-78 (p98)
+    e = norm(ecc)
+    ν̃ = acos((ecc⋅r⃗∞)/(e*norm(r⃗∞))) # Vallado 4e Eq. 2-86 (p100)
+    trueanom_in = r⃗∞⋅v⃗∞ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace; true anomaly at SOI entry
+    H_in = 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom_in/2)) # Hyperbolic anomaly at SOI entry
+    H_out = -H_in # We know that the hyperbolic anomaly has the same magnitude at entry and exit
+    sma = 1/(2/norm(r⃗∞) - norm(v⃗∞)^2/μ_CB) # Vallado 4e Eq. 2-74 (p96)
+    Δt = sqrt(-sma^3/μ_CB)*(e*sinh(H_out) - H_out - (e*sinh(H_in) - H_in)) # Vallado 4e Eq. 2-39 (p57)
+    epoch_et_out = epoch_et + Δt
+
+    x⃗∞out = Vector{Float64}(undef,6)
+    x⃗∞out[1:3] = vrotv( # Mirror the radius vector "at infinity" about the periapsis vector
+    r⃗∞, # To be rotated
+    ecc, # periapsis vector (not required to be unit vector)
+    π # 180 degrees
+    )
+    x⃗∞out[4:6] = vrotv(
+        v⃗∞,
+        r⃗∞ × v⃗∞, # axis of rotation as specific angular momentum vector
+        2*asin(1/e) # Vallado 4e Eq. 2-28 (p53), turn by the hyperbolic turn angle
+    )
+    x⃗_fbbdy_out = spkgeo(fbbdyc,epoch_et_out,inrt_frame,CBc)[1]
+
+    return x⃗∞out + x⃗_fbbdy_out, epoch_et_out
 end
