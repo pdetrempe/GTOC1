@@ -200,10 +200,9 @@ function flyby_TOF(;x⃗∞,μ_CB_or_CB_name)
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗∞)/(e*norm(r⃗∞))) # Vallado 4e Eq. 2-86 (p100)
     νin = r⃗∞⋅v⃗∞ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace; true anomaly at SOI entry
-    H_in = 2*atanh(sqrt((e-1)/(e+1)) * tan(νin/2)) # Hyperbolic anomaly at SOI entry
-    H_out = -H_in # We know that the hyperbolic anomaly has the same magnitude at entry and exit
+    Hin = 2*atanh(sqrt((e-1)/(e+1)) * tan(νin/2)) # Hyperbolic anomaly at SOI entry
     sma = 1/(2/norm(r⃗∞) - norm(v⃗∞)^2/μ_CB) # Vallado 4e Eq. 2-74 (p96)
-    return sqrt(-sma^3/μ_CB)*(e*sinh(H_out) - H_out - (e*sinh(H_in) - H_in)) # Vallado 4e Eq. 2-39 (p57)
+    return sqrt(-sma^3/μ_CB)*2*(Hin - e*sinh(Hin)) # Vallado 4e Eq. 2-39 (p57) with simplifications since Hout = -Hin
 end
 
 function naive_flyby(;x⃗_inrt,epoch_et,flyby_body,CB=default_CB_str,inrt_frame=default_ref_frame)
@@ -223,10 +222,9 @@ function naive_flyby(;x⃗_inrt,epoch_et,flyby_body,CB=default_CB_str,inrt_frame
     
     ν̃ = acos((ecc⋅r⃗∞)/(e*r∞)) # Vallado 4e Eq. 2-86 (p100)
     νin = rdv > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace; true anomaly at SOI entry
-    H_in = 2*atanh(sqrt((e-1)/(e+1)) * tan(νin/2)) # Hyperbolic anomaly at SOI entry
-    H_out = -H_in # We know that the hyperbolic anomaly has the same magnitude at entry and exit
+    Hin = 2*atanh(sqrt((e-1)/(e+1)) * tan(νin/2)) # Hyperbolic anomaly at SOI entry
     sma = 1/(2/r∞ - v∞2/μ_fbbdy) # Vallado 4e Eq. 2-74 (p96)
-    Δt = sqrt(-sma^3/μ_fbbdy)*(e*sinh(H_out) - H_out - (e*sinh(H_in) - H_in)) # Vallado 4e Eq. 2-39 (p57)
+    Δt = sqrt(-sma^3/μ_CB)*2*(Hin - e*sinh(Hin)) # Vallado 4e Eq. 2-39 (p57) with simplifications since Hout = -Hin
     epoch_et_out = epoch_et + Δt
 
     x⃗∞out = Vector{Float64}(undef,6)
