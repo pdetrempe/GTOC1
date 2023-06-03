@@ -1,6 +1,6 @@
 using LinearAlgebra, SPICE
 
-export e⃗, ν, a, i, Ω, ω, RV2COE, COE2RV, body_SOI, hyp_anom, ecc_anom, mean_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, flyby_TOF
+export e⃗, ν, a, i, Ω, ω, RV2COE, COE2RV, body_SOI, hyp_anom, ecc_anom, mean_anom, hyp_turn_angle, hyp_periapsis, hyp_exit_r⃗, hyp_exit_v⃗, hyp_exit_x⃗, flyby_TOF, naive_flyby
 
 get_GM(μ_CB_or_CB_name) = typeof(μ_CB_or_CB_name) != String ? μ_CB_or_CB_name : bodvrd(μ_CB_or_CB_name,"GM")[1] # if GM provided directly (is a number), use it, else retrieve from body name (String)
 
@@ -220,6 +220,7 @@ function naive_flyby(;x⃗_inrt,epoch_et,flyby_body,CB=default_CB_str,inrt_frame
     μ_fbbdy = bodvrd(flyby_body,"GM")[1]
     ecc = ((v∞2 - μ_fbbdy/r∞)*r⃗∞ - (rdv)*v⃗∞)/μ_fbbdy # Vallado 4e Eq. 2-78 (p98)
     e = norm(ecc)
+    
     ν̃ = acos((ecc⋅r⃗∞)/(e*r∞)) # Vallado 4e Eq. 2-86 (p100)
     νin = rdv > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace; true anomaly at SOI entry
     H_in = 2*atanh(sqrt((e-1)/(e+1)) * tan(νin/2)) # Hyperbolic anomaly at SOI entry
