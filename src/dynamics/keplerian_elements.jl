@@ -42,6 +42,13 @@ function M2EH(;M,ecc,tol=eps(Float64))
         end
     end
 end
+function EH2ν(;E_or_H,ecc)
+    if ecc > 1
+        return 2*atan(sqrt((ecc+1)/(ecc-1))*tanh(E_or_H/2)) # Vallado 4e Eq. 2-36 (p56)
+    else
+        return 2*atan(sqrt((1+ecc)/(1-ecc))*tan(E_or_H/2)) # Vallado 4e Eq. 2-13 (p48)
+    end
+end
 
 # function get_planet_orbit(;planet::String, ET::Epoch, frame="ECLIPJ2000", CB="Sun")
 #     OE = body_osc_elt(;planet=planet, ET=ET, frame=frame, CB=CB)
