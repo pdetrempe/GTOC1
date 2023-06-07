@@ -51,6 +51,7 @@ function ω(;x⃗,μ_CB_or_CB_name)
     return ecc[3] > 0 ? AOP : 2π - AOP
 end
 
+"   COE = [a,e,i,Ω,ω,ν]"
 function RV2COE(;x⃗,μ_CB_or_CB_name) # Vallado 4e Algorithm 9 (p113)
     r⃗ = view(x⃗,1:3)
     v⃗ = view(x⃗,4:6)
