@@ -132,12 +132,13 @@ function mean_anom(;x⃗,μ_CB_or_CB_name)
     e = norm(ecc)
     ν̃ = acos((ecc⋅r⃗)/(e*norm(r⃗))) # Vallado 4e Eq. 2-86 (p100)
     trueanom = r⃗⋅v⃗ > 0 ? ν̃ : 2π - ν̃ # Correct for halfspace
-    anom = if e < 1 
-        2*atan(sqrt((1-e)/(1+e)) * tan(trueanom/2)) # Vallado 4e Eq. 2-14 (p48)
+    if e < 1 
+        E = 2*atan(sqrt((1-e)/(1+e)) * tan(trueanom/2)) # Vallado 4e Eq. 2-14 (p48)
+        return E - e*sin(E) # Vallado 4e Eq. 2-4 (p45)
     elseif e > 1
-        2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom/2)) # Vallado 4e Eq. 2-35 (p56)
+        H = 2*atanh(sqrt((e-1)/(e+1)) * tan(trueanom/2)) # Vallado 4e Eq. 2-35 (p56)
+        return e*sinh(H) - H # Vallado 4e Eq. 2-38 (p57)
     end
-    return anom - e*sin(anom) # Vallado 4e Eq. 2-4 (p45)
 end
 
 function hyp_turn_angle(;x⃗,μ_CB_or_CB_name)
