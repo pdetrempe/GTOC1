@@ -1,6 +1,6 @@
 using SPICE, AstroTime
 
-export body_osc_elt #, get_planet_orbit
+export body_osc_elt, M2EH, EH2ν #, get_planet_orbit
 
 # # Compute asteroid reference time from mean anomaly
 # # Because the PlanetOrbits package uses reference time exclusively
